@@ -1143,8 +1143,58 @@ function loadData() {
 function saveData(d) { localStorage.setItem('inboby_data', JSON.stringify(d)); }
 let data = loadData();
 
+// ========== INDEXEDDB FOR VIDEOS ==========
+let videoDB;
+function openVideoDB() {
+  return new Promise((resolve, reject) => {
+    const req = indexedDB.open('inboby_videos', 1);
+    req.onupgradeneeded = e => { e.target.result.createObjectStore('videos'); };
+    req.onsuccess = e => { videoDB = e.target.result; resolve(videoDB); };
+    req.onerror = e => reject(e);
+  });
+}
+async function storeVideo(id, blob) {
+  const db = videoDB || await openVideoDB();
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction('videos', 'readwrite');
+    tx.objectStore('videos').put(blob, 'vid_' + id);
+    tx.oncomplete = () => resolve();
+    tx.onerror = e => reject(e);
+  });
+}
+async function getVideo(id) {
+  const db = videoDB || await openVideoDB();
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction('videos', 'readonly');
+    const req = tx.objectStore('videos').get('vid_' + id);
+    req.onsuccess = () => resolve(req.result);
+    req.onerror = e => reject(e);
+  });
+}
+async function deleteVideo(id) {
+  const db = videoDB || await openVideoDB();
+  return new Promise((resolve) => {
+    const tx = db.transaction('videos', 'readwrite');
+    tx.objectStore('videos').delete('vid_' + id);
+    tx.oncomplete = () => resolve();
+    tx.onerror = () => resolve();
+  });
+}
+
+// Load video blobs for posts and create object URLs
+async function loadVideoURLs() {
+  await openVideoDB();
+  for (const p of data.posts) {
+    if (p.hasVideo) {
+      const blob = await getVideo(p.id);
+      if (blob) p._videoURL = URL.createObjectURL(blob);
+    }
+  }
+}
+
 // ========== INIT ==========
-function init() {
+async function init() {
+  await loadVideoURLs();
   applyTheme();
   applyAnimations();
   renderFeed();
@@ -1258,6 +1308,7 @@ function toggleRecording() {
       const blob = new Blob(recordedChunks, { type: 'video/webm' });
       const url = URL.createObjectURL(blob);
       currentVideoFile = url;
+      currentVideoFileBlob = blob;
       currentVideoImage = '';
       const vid = document.getElementById('videoFilePreview');
       vid.src = url; vid.style.display = 'block';
@@ -1334,9 +1385,11 @@ function closeNewPost() {
   document.getElementById('postImageInput').value = '';
   document.getElementById('postVideoInput').value = '';
   currentPostVideo = '';
+  currentPostVideoBlob = null;
 }
 
 let currentPostVideo = '';
+let currentPostVideoBlob = null;
 
 function previewPostImage(e) {
   const file = e.target.files[0]; if (!file) return;
@@ -1354,25 +1407,28 @@ function previewPostVideo(e) {
   // Clear image if video selected
   document.getElementById('postImagePreview').style.display = 'none';
   document.getElementById('postImageInput').value = '';
-  const reader = new FileReader();
-  reader.onload = ev => {
-    currentPostVideo = ev.target.result;
-    const vid = document.getElementById('postVideoPreview');
-    vid.src = ev.target.result;
-    vid.style.display = 'block';
-  };
-  reader.readAsDataURL(file);
+  currentPostVideoBlob = file;
+  const url = URL.createObjectURL(file);
+  currentPostVideo = url;
+  const vid = document.getElementById('postVideoPreview');
+  vid.src = url;
+  vid.style.display = 'block';
 }
 
-function createPost() {
+async function createPost() {
   const text = document.getElementById('postText').value.trim();
   const imgEl = document.getElementById('postImagePreview');
   const image = imgEl.style.display !== 'none' ? imgEl.src : '';
-  const video = currentPostVideo || '';
-  if (!text && !image && !video) { showToast('כתוב משהו או הוסף תמונה/סרטון 😊'); return; }
-  const post = { id: Date.now(), text, image, video, time: new Date().toISOString(), likes: 0 };
+  const hasVideo = !!(currentPostVideoBlob || currentPostVideo);
+  if (!text && !image && !hasVideo) { showToast('כתוב משהו או הוסף תמונה/סרטון 😊'); return; }
+  const postId = Date.now();
+  const post = { id: postId, text, image, video: '', hasVideo: hasVideo, time: new Date().toISOString(), likes: 0 };
+  if (hasVideo && currentPostVideoBlob) {
+    await storeVideo(postId, currentPostVideoBlob);
+    post._videoURL = currentPostVideo; // keep the object URL for immediate display
+  }
   data.posts.unshift(post); saveData(data);
-  closeNewPost(); renderFeed(); renderMyPosts(); updateStats();
+  closeNewPost(); renderFeed(); renderShorts(); renderMyPosts(); updateStats();
   showToast('הפוסט פורסם! 🚀');
 }
 
@@ -1381,6 +1437,7 @@ let currentVideoType = 'video';
 let selectedEffect = '';
 let currentVideoFile = '';
 let currentVideoImage = '';
+let currentVideoFileBlob = null;
 
 function openVideoModal() {
   currentVideoType = 'video';
@@ -1399,7 +1456,7 @@ function closeVideoModal() {
   document.getElementById('videoFilePreview').style.display = 'none';
   document.getElementById('videoImagePreview').style.display = 'none';
   document.getElementById('videoFileInput').value = '';
-  currentVideoFile = ''; currentVideoImage = ''; selectedEffect = '';
+  currentVideoFile = ''; currentVideoImage = ''; selectedEffect = ''; currentVideoFileBlob = null;
   document.querySelectorAll('.effect-card').forEach(c => c.classList.remove('selected'));
 }
 
@@ -1413,34 +1470,52 @@ function selectEffect(el, name) {
 function previewVideoFile(e) {
   const file = e.target.files[0]; if (!file) return;
   const isVideo = file.type.startsWith('video/');
-  const reader = new FileReader();
-  reader.onload = ev => {
-    if (isVideo) {
-      currentVideoFile = ev.target.result;
-      currentVideoImage = '';
-      const vid = document.getElementById('videoFilePreview');
-      vid.src = ev.target.result; vid.style.display = 'block';
-      document.getElementById('videoImagePreview').style.display = 'none';
-    } else {
+  if (isVideo) {
+    currentVideoFileBlob = file;
+    const url = URL.createObjectURL(file);
+    currentVideoFile = url;
+    currentVideoImage = '';
+    const vid = document.getElementById('videoFilePreview');
+    vid.src = url; vid.style.display = 'block';
+    document.getElementById('videoImagePreview').style.display = 'none';
+  } else {
+    const reader = new FileReader();
+    reader.onload = ev => {
       currentVideoImage = ev.target.result;
       currentVideoFile = '';
+      currentVideoFileBlob = null;
       const img = document.getElementById('videoImagePreview');
       img.src = ev.target.result; img.style.display = 'block';
       document.getElementById('videoFilePreview').style.display = 'none';
-    }
-  };
-  reader.readAsDataURL(file);
+    };
+    reader.readAsDataURL(file);
+  }
 }
 
-function createVideoPost() {
+async function createVideoPost() {
   const text = document.getElementById('videoText').value.trim();
-  const video = currentVideoFile || '';
+  const hasVideo = !!(currentVideoFileBlob || currentVideoFile);
   const image = currentVideoImage || '';
-  if (!text && !video && !image) { showToast('הוסף תוכן או בחר קובץ 😊'); return; }
+  if (!text && !hasVideo && !image) { showToast('הוסף תוכן או בחר קובץ 😊'); return; }
   const typeLabel = currentVideoType === 'short' ? '⚡ שורט' : '🎬 סרטון';
   const effectLabel = selectedEffect ? ` | אפקט: ${selectedEffect}` : '';
   const fullText = `[${typeLabel}${effectLabel}]\n${text}`;
-  const post = { id: Date.now(), text: fullText, image, video, time: new Date().toISOString(), likes: 0 };
+  const postId = Date.now();
+  const post = { id: postId, text: fullText, image, video: '', hasVideo: hasVideo, time: new Date().toISOString(), likes: 0 };
+  if (hasVideo) {
+    if (currentVideoFileBlob) {
+      await storeVideo(postId, currentVideoFileBlob);
+      post._videoURL = currentVideoFile;
+    } else if (currentVideoFile && currentVideoFile.startsWith('blob:')) {
+      // From camera recording - fetch blob from URL
+      try {
+        const resp = await fetch(currentVideoFile);
+        const blob = await resp.blob();
+        await storeVideo(postId, blob);
+        post._videoURL = currentVideoFile;
+      } catch(e) { console.error('Failed to store camera video', e); }
+    }
+  }
   data.posts.unshift(post); saveData(data);
   closeVideoModal(); renderFeed(); renderShorts(); renderMyPosts(); updateStats();
   showToast(currentVideoType === 'short' ? 'השורט פורסם! ⚡' : 'הסרטון פורסם! 🎬');
@@ -1477,7 +1552,9 @@ function postHTML(p, i) {
     : data.profile.avatarEmoji || '😎';
   const time = timeAgo(new Date(p.time));
   let mediaHTML = '';
-  if (p.video) {
+  if (p.hasVideo && p._videoURL) {
+    mediaHTML = `<div class="post-video-wrapper"><video src="${p._videoURL}" controls playsinline preload="metadata"></video></div>`;
+  } else if (p.video) {
     mediaHTML = `<div class="post-video-wrapper"><video src="${p.video}" controls playsinline preload="metadata"></video></div>`;
   } else if (p.image) {
     mediaHTML = `<img class="post-image" src="${p.image}" alt="">`;
@@ -1509,9 +1586,11 @@ function likePost(id) {
 
 function deletePost(id) {
   if (!confirm('למחוק את הפוסט?')) return;
+  const post = data.posts.find(p => p.id === id);
+  if (post && post.hasVideo) deleteVideo(id);
   data.posts = data.posts.filter(p => p.id !== id);
   delete data.likes[id]; saveData(data);
-  renderFeed(); renderMyPosts(); updateStats();
+  renderFeed(); renderShorts(); renderMyPosts(); updateStats();
   showToast('הפוסט נמחק');
 }
 
