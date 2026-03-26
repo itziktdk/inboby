@@ -534,6 +534,117 @@ body.no-animations, body.no-animations * {
 }
 .gallery-btn:hover { border-color: var(--accent); color: var(--accent-light); background: var(--bg-hover); }
 
+/* ========== CAMERA SECTION ========== */
+.camera-section { margin-top: 12px; }
+
+.camera-open-btn {
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  width: 100%; padding: 14px; border-radius: var(--radius-sm);
+  background: var(--gradient-2); border: none;
+  color: white; font-family: 'Rubik'; font-size: 15px;
+  font-weight: 600; cursor: pointer; transition: all var(--transition);
+  box-shadow: 0 4px 15px rgba(236, 72, 153, 0.3);
+}
+.camera-open-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 25px rgba(236, 72, 153, 0.4); }
+
+.camera-preview-wrapper {
+  position: relative; border-radius: var(--radius);
+  overflow: hidden; background: #000; margin-bottom: 8px;
+  aspect-ratio: 9/16; max-height: 400px;
+}
+.camera-preview-wrapper video {
+  width: 100%; height: 100%; object-fit: cover;
+  transform: scaleX(-1); /* Mirror for selfie */
+}
+.camera-effect-overlay {
+  position: absolute; inset: 0; pointer-events: none; z-index: 2;
+  border-radius: var(--radius);
+}
+.camera-effect-overlay.rainbow {
+  background: linear-gradient(135deg, rgba(255,0,0,0.15), rgba(255,165,0,0.15), rgba(255,255,0,0.15), rgba(0,128,0,0.15), rgba(0,0,255,0.15), rgba(128,0,128,0.15));
+  animation: rainbowOverlay 3s linear infinite;
+}
+@keyframes rainbowOverlay {
+  0% { filter: hue-rotate(0deg); } 100% { filter: hue-rotate(360deg); }
+}
+.camera-effect-overlay.neon {
+  box-shadow: inset 0 0 40px rgba(124,58,237,0.5), inset 0 0 80px rgba(59,130,246,0.3);
+  animation: neonPulseOverlay 1.5s ease-in-out infinite;
+}
+@keyframes neonPulseOverlay {
+  0%, 100% { box-shadow: inset 0 0 40px rgba(124,58,237,0.5), inset 0 0 80px rgba(59,130,246,0.3); }
+  50% { box-shadow: inset 0 0 60px rgba(124,58,237,0.7), inset 0 0 100px rgba(59,130,246,0.5); }
+}
+.camera-effect-overlay.sparkle {
+  background: radial-gradient(circle at 30% 20%, rgba(255,255,255,0.4) 0%, transparent 2%),
+    radial-gradient(circle at 70% 40%, rgba(255,255,255,0.3) 0%, transparent 2%),
+    radial-gradient(circle at 50% 70%, rgba(255,255,255,0.4) 0%, transparent 2%),
+    radial-gradient(circle at 20% 80%, rgba(255,255,255,0.3) 0%, transparent 2%),
+    radial-gradient(circle at 80% 10%, rgba(255,255,255,0.4) 0%, transparent 2%);
+  animation: sparkleOverlay 2s ease infinite;
+}
+@keyframes sparkleOverlay { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+.camera-effect-overlay.vintage { background: rgba(180,140,80,0.2); }
+.camera-effect-overlay.comic { border: 4px solid #000; box-shadow: inset 5px 5px 0 rgba(0,0,0,0.1); }
+.camera-effect-overlay.pixel { backdrop-filter: contrast(1.5) saturate(1.5); }
+.camera-effect-overlay.glitch {
+  animation: glitchOverlay 0.5s steps(3) infinite;
+}
+@keyframes glitchOverlay {
+  0% { box-shadow: inset 3px 0 rgba(255,0,0,0.3), inset -3px 0 rgba(0,255,255,0.3); }
+  50% { box-shadow: inset -3px 0 rgba(255,0,0,0.3), inset 3px 0 rgba(0,255,255,0.3); }
+}
+.camera-effect-overlay.fire {
+  background: linear-gradient(0deg, rgba(255,69,0,0.25), transparent 60%);
+  animation: fireOverlay 1s ease infinite;
+}
+@keyframes fireOverlay { 0%,100%{ opacity:0.8; } 50%{ opacity:1; } }
+.camera-effect-overlay.ice {
+  background: linear-gradient(180deg, rgba(168,237,234,0.2), transparent 60%);
+  box-shadow: inset 0 0 30px rgba(116,185,255,0.2);
+}
+
+.camera-controls {
+  position: absolute; bottom: 16px; left: 50%; transform: translateX(-50%);
+  display: flex; align-items: center; gap: 24px; z-index: 3;
+}
+.camera-ctrl-btn {
+  width: 44px; height: 44px; border-radius: 50%;
+  background: rgba(0,0,0,0.5); border: 2px solid rgba(255,255,255,0.3);
+  cursor: pointer; display: flex; align-items: center; justify-content: center;
+  transition: all var(--transition); backdrop-filter: blur(4px);
+}
+.camera-ctrl-btn:hover { background: rgba(0,0,0,0.7); border-color: white; }
+
+.camera-record-btn {
+  width: 68px; height: 68px; border-radius: 50%;
+  background: transparent; border: 4px solid white;
+  cursor: pointer; display: flex; align-items: center; justify-content: center;
+  transition: all var(--transition); padding: 0;
+}
+.camera-record-btn:hover { transform: scale(1.05); }
+.record-dot {
+  width: 48px; height: 48px; border-radius: 50%;
+  background: #ef4444; transition: all 0.3s ease;
+}
+.camera-record-btn.recording .record-dot {
+  width: 28px; height: 28px; border-radius: 6px;
+  background: #ef4444;
+}
+
+.recording-timer {
+  position: absolute; top: 16px; left: 50%; transform: translateX(-50%);
+  display: flex; align-items: center; gap: 8px; z-index: 3;
+  background: rgba(0,0,0,0.6); padding: 6px 14px; border-radius: 20px;
+  backdrop-filter: blur(4px);
+  color: white; font-family: 'Rubik'; font-size: 14px; font-weight: 600;
+}
+.rec-indicator {
+  width: 10px; height: 10px; border-radius: 50%;
+  background: #ef4444; animation: recBlink 1s ease infinite;
+}
+@keyframes recBlink { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+
 /* ========== RAFFLES ========== */
 .raffle-card {
   background: var(--bg-card); border: 1px solid var(--border);
@@ -784,6 +895,19 @@ body.no-animations, body.no-animations * {
     </div>
   </div>
 
+  <!-- Shorts Page -->
+  <div class="page" id="page-shorts">
+    <div class="section-header">
+      <h2 class="section-title"><svg class="svg-icon"><use href="#icon-zap"/></svg> שורטים</h2>
+    </div>
+    <div id="shorts-container"></div>
+    <div class="empty-state" id="empty-shorts" style="display:none">
+      <div class="empty-icon"><svg class="svg-icon"><use href="#icon-zap"/></svg></div>
+      <h3>אין עדיין שורטים</h3>
+      <p>צור שורט ראשון עם המצלמה! לחץ על כפתור ה-+ למטה</p>
+    </div>
+  </div>
+
   <!-- Settings Page -->
   <div class="page" id="page-settings">
     <div class="section-header"><h2 class="section-title"><svg class="svg-icon"><use href="#icon-settings"/></svg> הגדרות</h2></div>
@@ -826,8 +950,8 @@ body.no-animations, body.no-animations * {
   <button class="nav-item active" onclick="switchPage('feed')" data-page="feed">
     <span class="nav-icon"><svg class="svg-icon"><use href="#icon-home"/></svg></span>בית
   </button>
-  <button class="nav-item" onclick="switchPage('raffles')" data-page="raffles">
-    <span class="nav-icon"><svg class="svg-icon"><use href="#icon-trophy"/></svg></span>הגרלות
+  <button class="nav-item" onclick="switchPage('shorts')" data-page="shorts">
+    <span class="nav-icon"><svg class="svg-icon"><use href="#icon-zap"/></svg></span>שורטים
   </button>
   <div class="create-btn-wrapper">
     <button class="create-btn" onclick="toggleCreatePopup()" id="createBtn">
@@ -835,11 +959,11 @@ body.no-animations, body.no-animations * {
     </button>
     <span class="create-btn-label">צור</span>
   </div>
+  <button class="nav-item" onclick="switchPage('raffles')" data-page="raffles">
+    <span class="nav-icon"><svg class="svg-icon"><use href="#icon-trophy"/></svg></span>הגרלות
+  </button>
   <button class="nav-item" onclick="switchPage('profile')" data-page="profile">
     <span class="nav-icon"><svg class="svg-icon"><use href="#icon-user"/></svg></span>פרופיל
-  </button>
-  <button class="nav-item" onclick="switchPage('settings')" data-page="settings">
-    <span class="nav-icon"><svg class="svg-icon"><use href="#icon-settings"/></svg></span>הגדרות
   </button>
 </nav>
 
@@ -933,6 +1057,32 @@ body.no-animations, body.no-animations * {
       </div>
     </div>
 
+    <!-- Camera Section -->
+    <div class="camera-section" id="cameraSection">
+      <div class="camera-preview-wrapper" id="cameraPreviewWrapper" style="display:none">
+        <video id="cameraPreview" autoplay playsinline muted></video>
+        <div class="camera-effect-overlay" id="cameraEffectOverlay"></div>
+        <div class="camera-controls">
+          <button class="camera-ctrl-btn" onclick="flipCamera()" title="הפוך מצלמה">
+            <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="white" stroke-width="2"><path d="M1 4v6h6"/><path d="M23 20v-6h-6"/><path d="M20.49 9A9 9 0 005.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 013.51 15"/></svg>
+          </button>
+          <button class="camera-record-btn" id="recordBtn" onclick="toggleRecording()">
+            <div class="record-dot" id="recordDot"></div>
+          </button>
+          <button class="camera-ctrl-btn" onclick="stopCamera()" title="סגור מצלמה">
+            <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="white" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          </button>
+        </div>
+        <div class="recording-timer" id="recordingTimer" style="display:none">
+          <div class="rec-indicator"></div>
+          <span id="recTime">00:00</span>
+        </div>
+      </div>
+      <button class="camera-open-btn" id="cameraOpenBtn" onclick="openCamera()">
+        <svg class="svg-icon"><use href="#icon-camera"/></svg> פתח מצלמה
+      </button>
+    </div>
+
     <!-- Gallery Button -->
     <label class="gallery-btn" id="videoGalleryBtn">
       <svg class="svg-icon"><use href="#icon-image"/></svg> בחר מהגלריה
@@ -998,6 +1148,7 @@ function init() {
   applyTheme();
   applyAnimations();
   renderFeed();
+  renderShorts();
   renderProfile();
   renderRaffles();
   updateStats();
@@ -1011,6 +1162,7 @@ function switchPage(page) {
   const navEl = document.querySelector(`[data-page="${page}"]`);
   if (navEl) navEl.classList.add('active');
   if (page === 'profile') { renderMyPosts(); updateStats(); }
+  if (page === 'shorts') { renderShorts(); }
 }
 
 // ========== THEME ==========
@@ -1036,6 +1188,123 @@ function showToast(msg) {
   t.textContent = msg; t.classList.add('show');
   setTimeout(() => t.classList.remove('show'), 2500);
 }
+
+// ========== CAMERA & RECORDING ==========
+let cameraStream = null;
+let mediaRecorder = null;
+let recordedChunks = [];
+let isRecording = false;
+let recTimerInterval = null;
+let recSeconds = 0;
+let facingMode = 'user'; // 'user' = front, 'environment' = back
+
+async function openCamera() {
+  try {
+    const constraints = { video: { facingMode: facingMode, width: { ideal: 1080 }, height: { ideal: 1920 } }, audio: true };
+    cameraStream = await navigator.mediaDevices.getUserMedia(constraints);
+    const preview = document.getElementById('cameraPreview');
+    preview.srcObject = cameraStream;
+    document.getElementById('cameraPreviewWrapper').style.display = 'block';
+    document.getElementById('cameraOpenBtn').style.display = 'none';
+    // Apply effect overlay if selected
+    applyCameraEffect();
+  } catch (err) {
+    console.error('Camera error:', err);
+    showToast('לא הצלחתי לפתוח את המצלמה 😅 בדוק הרשאות');
+  }
+}
+
+function stopCamera() {
+  if (isRecording) toggleRecording(); // Stop recording first
+  if (cameraStream) {
+    cameraStream.getTracks().forEach(t => t.stop());
+    cameraStream = null;
+  }
+  document.getElementById('cameraPreview').srcObject = null;
+  document.getElementById('cameraPreviewWrapper').style.display = 'none';
+  document.getElementById('cameraOpenBtn').style.display = 'flex';
+}
+
+async function flipCamera() {
+  facingMode = facingMode === 'user' ? 'environment' : 'user';
+  if (cameraStream) {
+    cameraStream.getTracks().forEach(t => t.stop());
+    try {
+      const constraints = { video: { facingMode: facingMode, width: { ideal: 1080 }, height: { ideal: 1920 } }, audio: true };
+      cameraStream = await navigator.mediaDevices.getUserMedia(constraints);
+      const preview = document.getElementById('cameraPreview');
+      preview.srcObject = cameraStream;
+      // Flip mirror for front camera
+      preview.style.transform = facingMode === 'user' ? 'scaleX(-1)' : 'scaleX(1)';
+    } catch(e) {
+      showToast('אין מצלמה אחורית זמינה');
+      facingMode = 'user';
+    }
+  }
+}
+
+function toggleRecording() {
+  if (!isRecording) {
+    // Start recording
+    recordedChunks = [];
+    const options = { mimeType: 'video/webm;codecs=vp9,opus' };
+    try { mediaRecorder = new MediaRecorder(cameraStream, options); }
+    catch { 
+      try { mediaRecorder = new MediaRecorder(cameraStream, { mimeType: 'video/webm' }); }
+      catch { mediaRecorder = new MediaRecorder(cameraStream); }
+    }
+    mediaRecorder.ondataavailable = e => { if (e.data.size > 0) recordedChunks.push(e.data); };
+    mediaRecorder.onstop = () => {
+      const blob = new Blob(recordedChunks, { type: 'video/webm' });
+      const url = URL.createObjectURL(blob);
+      currentVideoFile = url;
+      currentVideoImage = '';
+      const vid = document.getElementById('videoFilePreview');
+      vid.src = url; vid.style.display = 'block';
+      document.getElementById('videoImagePreview').style.display = 'none';
+      stopCamera();
+      showToast('הסרטון הוקלט! 🎬');
+    };
+    mediaRecorder.start();
+    isRecording = true;
+    recSeconds = 0;
+    document.getElementById('recordBtn').classList.add('recording');
+    document.getElementById('recordingTimer').style.display = 'flex';
+    updateRecTimer();
+    recTimerInterval = setInterval(updateRecTimer, 1000);
+  } else {
+    // Stop recording
+    mediaRecorder.stop();
+    isRecording = false;
+    document.getElementById('recordBtn').classList.remove('recording');
+    document.getElementById('recordingTimer').style.display = 'none';
+    clearInterval(recTimerInterval);
+  }
+}
+
+function updateRecTimer() {
+  recSeconds++;
+  const m = String(Math.floor(recSeconds / 60)).padStart(2, '0');
+  const s = String(recSeconds % 60).padStart(2, '0');
+  document.getElementById('recTime').textContent = `${m}:${s}`;
+}
+
+function applyCameraEffect() {
+  const overlay = document.getElementById('cameraEffectOverlay');
+  overlay.className = 'camera-effect-overlay';
+  if (selectedEffect) overlay.classList.add(selectedEffect);
+}
+
+// Update effect when selecting in grid (override the old selectEffect)
+const origSelectEffect = selectEffect;
+selectEffect = function(el, name) {
+  document.querySelectorAll('.effect-card').forEach(c => c.classList.remove('selected'));
+  if (selectedEffect === name) { selectedEffect = ''; } else {
+    el.classList.add('selected');
+    selectedEffect = name;
+  }
+  applyCameraEffect();
+};
 
 // ========== CREATE POPUP ==========
 function toggleCreatePopup() {
@@ -1124,6 +1393,7 @@ function openShortModal() {
   document.getElementById('videoModal').classList.add('show');
 }
 function closeVideoModal() {
+  stopCamera(); // Stop camera if open
   document.getElementById('videoModal').classList.remove('show');
   document.getElementById('videoText').value = '';
   document.getElementById('videoFilePreview').style.display = 'none';
@@ -1172,11 +1442,20 @@ function createVideoPost() {
   const fullText = `[${typeLabel}${effectLabel}]\n${text}`;
   const post = { id: Date.now(), text: fullText, image, video, time: new Date().toISOString(), likes: 0 };
   data.posts.unshift(post); saveData(data);
-  closeVideoModal(); renderFeed(); renderMyPosts(); updateStats();
+  closeVideoModal(); renderFeed(); renderShorts(); renderMyPosts(); updateStats();
   showToast(currentVideoType === 'short' ? 'השורט פורסם! ⚡' : 'הסרטון פורסם! 🎬');
 }
 
 // ========== RENDER FEED ==========
+function renderShorts() {
+  const c = document.getElementById('shorts-container');
+  const empty = document.getElementById('empty-shorts');
+  const shorts = data.posts.filter(p => p.text && p.text.includes('⚡ שורט'));
+  if (shorts.length === 0) { c.innerHTML = ''; empty.style.display = 'block'; return; }
+  empty.style.display = 'none';
+  c.innerHTML = shorts.map((p, i) => postHTML(p, i)).join('');
+}
+
 function renderFeed() {
   const c = document.getElementById('posts-container');
   const empty = document.getElementById('empty-feed');
