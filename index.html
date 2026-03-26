@@ -792,6 +792,99 @@ body.no-animations, body.no-animations * {
   box-shadow: 0 8px 30px var(--accent-glow);
 }
 .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+/* ========== SCROLL ANIMATIONS ========== */
+.animate-on-scroll {
+  opacity: 0; transform: translateY(40px);
+  transition: opacity 0.6s ease, transform 0.6s ease;
+}
+.animate-on-scroll.animate-in {
+  opacity: 1; transform: translateY(0);
+}
+
+/* ========== HOVER EFFECTS ========== */
+.post-card:hover {
+  transform: translateY(-4px) scale(1.01);
+}
+.raffle-card:hover {
+  transform: translateY(-4px) scale(1.01);
+}
+
+/* ========== RIPPLE EFFECT ========== */
+.ripple-effect {
+  position: absolute; border-radius: 50%;
+  background: rgba(255,255,255,0.3);
+  width: 0; height: 0;
+  transform: translate(-50%, -50%);
+  animation: rippleAnim 0.6s ease-out forwards;
+  pointer-events: none; z-index: 10;
+}
+@keyframes rippleAnim {
+  to { width: 200px; height: 200px; opacity: 0; }
+}
+
+/* ========== LIKE PARTICLES ========== */
+.like-particle {
+  position: fixed; width: 6px; height: 6px; border-radius: 50%;
+  pointer-events: none; z-index: 999;
+  animation: likeParticleAnim 0.6s ease-out forwards;
+}
+@keyframes likeParticleAnim {
+  0% { transform: translate(0,0) scale(1); opacity: 1; }
+  100% { transform: translate(var(--tx), var(--ty)) scale(0); opacity: 0; }
+}
+
+/* ========== FLOATING PARTICLES ========== */
+.floating-particles {
+  position: fixed; inset: 0; pointer-events: none; z-index: -1; overflow: hidden;
+}
+.floating-dot {
+  position: absolute; width: 3px; height: 3px; border-radius: 50%;
+  background: var(--accent-light); opacity: 0.3;
+  animation: floatDot linear infinite;
+}
+@keyframes floatDot {
+  0% { transform: translateY(100vh) rotate(0deg); opacity: 0; }
+  10% { opacity: 0.3; }
+  90% { opacity: 0.3; }
+  100% { transform: translateY(-10vh) rotate(360deg); opacity: 0; }
+}
+
+/* ========== BREATHING AVATAR ========== */
+.profile-avatar {
+  animation: breatheGlow 3s ease-in-out infinite;
+}
+@keyframes breatheGlow {
+  0%, 100% { box-shadow: 0 0 15px var(--accent-glow); }
+  50% { box-shadow: 0 0 35px var(--accent-glow), 0 0 60px rgba(124,58,237,0.15); }
+}
+
+/* ========== CREATE BTN PULSE ========== */
+.create-btn::after {
+  content: ''; position: absolute; inset: -4px; border-radius: 50%;
+  border: 2px solid var(--accent); opacity: 0;
+  animation: createPulseRing 2s ease-out infinite;
+}
+@keyframes createPulseRing {
+  0% { transform: scale(0.8); opacity: 0.6; }
+  100% { transform: scale(1.4); opacity: 0; }
+}
+.create-btn:hover { transform: translateY(-50%) rotate(90deg) scale(1.1); }
+
+/* ========== SHIMMER LOADING ========== */
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+/* ========== TITLE SLIDE IN ========== */
+.section-title {
+  animation: titleSlideIn 0.6s ease both;
+}
+@keyframes titleSlideIn {
+  from { opacity: 0; transform: translateX(20px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
 </style>
 </head>
 <body>
@@ -825,6 +918,9 @@ body.no-animations, body.no-animations * {
   <div class="orb"></div>
   <div class="orb"></div>
 </div>
+
+<!-- Floating particles -->
+<div class="floating-particles" id="floatingParticles"></div>
 
 <!-- Toast notification -->
 <div class="toast" id="toast"></div>
@@ -1539,9 +1635,12 @@ function renderShorts() {
 function renderFeed() {
   const c = document.getElementById('posts-container');
   const empty = document.getElementById('empty-feed');
-  if (data.posts.length === 0) { c.innerHTML = ''; empty.style.display = 'block'; return; }
+  const communityPosts = getCommunityPosts();
+  const allPosts = [...data.posts, ...communityPosts].sort((a, b) => new Date(b.time) - new Date(a.time));
+  if (allPosts.length === 0) { c.innerHTML = ''; empty.style.display = 'block'; return; }
   empty.style.display = 'none';
-  c.innerHTML = data.posts.map((p, i) => postHTML(p, i)).join('');
+  c.innerHTML = allPosts.map((p, i) => postHTML(p, i)).join('');
+  setTimeout(initScrollAnimations, 100);
 }
 
 function renderMyPosts() {
@@ -1552,9 +1651,18 @@ function renderMyPosts() {
 
 function postHTML(p, i) {
   const liked = data.likes[p.id];
-  const avatar = data.profile.avatar
-    ? `<img src="${data.profile.avatar}" alt="">`
-    : data.profile.avatarEmoji || '😎';
+  const isCommunity = p._community;
+  let avatar, authorName;
+  if (isCommunity) {
+    avatar = `<span style="font-size:20px">${p._userEmoji}</span>`;
+    authorName = p._userName;
+  } else {
+    avatar = data.profile.avatar
+      ? `<img src="${data.profile.avatar}" alt="">`
+      : data.profile.avatarEmoji || '😎';
+    authorName = data.profile.name;
+  }
+  const avatarBg = isCommunity ? `background:${p._userColor}40;` : '';
   const time = timeAgo(new Date(p.time));
   let mediaHTML = '';
   if (p.hasVideo && p._videoURL) {
@@ -1566,8 +1674,8 @@ function postHTML(p, i) {
   }
   return `<div class="post-card" style="animation-delay:${i * 0.08}s">
     <div class="post-header">
-      <div class="post-avatar">${avatar}</div>
-      <div><div class="post-author">${esc(data.profile.name)}</div><div class="post-time">${time}</div></div>
+      <div class="post-avatar" style="${avatarBg}">${avatar}</div>
+      <div><div class="post-author">${esc(authorName)}</div><div class="post-time">${time}</div></div>
     </div>
     ${p.text ? `<div class="post-content">${esc(p.text)}</div>` : ''}
     ${mediaHTML}
@@ -1575,17 +1683,31 @@ function postHTML(p, i) {
       <button class="post-action-btn ${liked ? 'liked' : ''}" onclick="likePost(${p.id})">
         <svg class="svg-icon-sm"><use href="${liked ? '#icon-heart-filled' : '#icon-heart'}"/></svg> ${p.likes}
       </button>
-      <button class="post-action-btn post-delete" onclick="deletePost(${p.id})">
+      ${!isCommunity ? `<button class="post-action-btn post-delete" onclick="deletePost(${p.id})">
         <svg class="svg-icon-sm"><use href="#icon-trash"/></svg>
-      </button>
+      </button>` : ''}
     </div>
   </div>`;
 }
 
 function likePost(id) {
-  const p = data.posts.find(x => x.id === id); if (!p) return;
-  if (data.likes[id]) { p.likes--; delete data.likes[id]; }
-  else { p.likes++; data.likes[id] = true; }
+  // Find in user posts or community posts
+  let p = data.posts.find(x => x.id === id);
+  let isCommunity = false;
+  if (!p) {
+    // Community post - store like state separately
+    isCommunity = true;
+  }
+  if (data.likes[id]) {
+    if (p) p.likes--;
+    delete data.likes[id];
+  } else {
+    if (p) p.likes++;
+    data.likes[id] = true;
+    // Spawn like particles
+    const btn = event.target.closest('.post-action-btn');
+    if (btn) spawnLikeParticles(btn);
+  }
   saveData(data); renderFeed(); renderMyPosts(); updateStats();
 }
 
@@ -1752,16 +1874,119 @@ document.querySelectorAll('.modal-overlay').forEach(m => {
   m.addEventListener('click', e => { if (e.target === m) m.classList.remove('show'); });
 });
 
+// ========== FLOATING PARTICLES ==========
+(function createFloatingParticles() {
+  const container = document.getElementById('floatingParticles');
+  for (let i = 0; i < 20; i++) {
+    const dot = document.createElement('div');
+    dot.className = 'floating-dot';
+    dot.style.left = Math.random() * 100 + 'vw';
+    dot.style.animationDuration = (10 + Math.random() * 20) + 's';
+    dot.style.animationDelay = (Math.random() * 15) + 's';
+    dot.style.width = dot.style.height = (2 + Math.random() * 3) + 'px';
+    container.appendChild(dot);
+  }
+})();
+
+// ========== COMMUNITY POSTS (fake users) ==========
+const COMMUNITY_USERS = [
+  { name: 'NinjaX', username: '@ninjax', emoji: '🥷', color: '#ef4444' },
+  { name: 'גיימר_פרו', username: '@gamer_pro', emoji: '🎮', color: '#22c55e' },
+  { name: 'ShadowKing', username: '@shadowking', emoji: '👑', color: '#f59e0b' },
+  { name: 'אלון גיימס', username: '@alon_games', emoji: '🕹️', color: '#3b82f6' },
+  { name: 'PixelMaster', username: '@pixelmaster', emoji: '🎨', color: '#ec4899' },
+  { name: 'דנה_יוטיוב', username: '@dana_yt', emoji: '📹', color: '#8b5cf6' },
+  { name: 'ProGamer99', username: '@progamer99', emoji: '🏆', color: '#06b6d4' },
+  { name: 'ליאם_שורטס', username: '@liam_shorts', emoji: '⚡', color: '#f97316' },
+];
+
+const COMMUNITY_POSTS = [
+  { userId: 0, text: 'זה עתה שברתי את השיא שלי בפורטנייט! 47 קילים במשחק אחד! 🔥🔥🔥\nמי רוצה 1v1?', likes: 187, timeOffset: 120000 },
+  { userId: 1, text: 'מי עוד משחק רובלוקס פה? בואו נבנה עולם ביחד! 🌍\nהנה הסרטון האחרון שלי:', likes: 94, timeOffset: 600000 },
+  { userId: 2, text: '[🎬 סרטון]\nהדרכה: איך להיות פרו במיינקראפט תוך שבוע 💎⛏️\nכל הטריקים שהפרואים לא רוצים שתדעו...', likes: 156, timeOffset: 1800000 },
+  { userId: 3, text: 'עכשיו עשיתי סטרים של 12 שעות ברצף 😴\nתודה לכל מי שצפה! אתם הקהילה הכי טובה!\n❤️❤️❤️', likes: 73, timeOffset: 3600000 },
+  { userId: 4, text: 'ציור דיגיטלי חדש שעשיתי! 🎨\nמה אתם אומרים? לייק אם אהבתם 👇', likes: 211, timeOffset: 7200000 },
+  { userId: 5, text: '[⚡ שורט]\nהרגע הכי מטורף שקרה לי בזמן שידור חי 😱😂\nצפו עד הסוף!!', likes: 342, timeOffset: 14400000 },
+  { userId: 6, text: 'טורניר גיימינג בשישי! 🏆\nפרס ראשון: 500₪ גיפט קארד!\nמי בפנים? כתבו למטה 👇🔥', likes: 128, timeOffset: 28800000 },
+  { userId: 7, text: '[⚡ שורט]\nאתגר: לנצח משחק שלם בלי לקחת דמג' + "'" + ' 🎯\nצפו מה קרה...', likes: 267, timeOffset: 43200000 },
+  { userId: 0, text: 'טיפ ליום: תמיד תבנו גבוה בפורטנייט, זה מה שמבדיל בין נוב לפרו! 📈\n#FortniteIsLife #GamingTips', likes: 89, timeOffset: 86400000 },
+  { userId: 4, text: 'עשיתי אנימציה חדשה! 2000 פריימים ביד 🤯\nלקח לי שבועיים אבל זה היה שווה כל שנייה ✨', likes: 178, timeOffset: 172800000 },
+];
+
+function getCommunityPosts() {
+  const now = Date.now();
+  return COMMUNITY_POSTS.map((cp, i) => {
+    const user = COMMUNITY_USERS[cp.userId];
+    return {
+      id: -(i + 1), // negative IDs for community posts
+      text: cp.text,
+      image: '', video: '', hasVideo: false,
+      time: new Date(now - cp.timeOffset).toISOString(),
+      likes: cp.likes,
+      _community: true,
+      _userName: user.name,
+      _userEmoji: user.emoji,
+      _userColor: user.color,
+    };
+  });
+}
+
+// ========== SCROLL ANIMATIONS ==========
+function initScrollAnimations() {
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('animate-in');
+        observer.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.1 });
+  document.querySelectorAll('.post-card, .raffle-card, .settings-section').forEach(el => {
+    el.classList.add('animate-on-scroll');
+    observer.observe(el);
+  });
+}
+
+// ========== RIPPLE EFFECT ==========
+document.addEventListener('click', function(e) {
+  const btn = e.target.closest('.btn, .btn-primary, .btn-secondary, .post-action-btn, .nav-item, .create-btn, .join-raffle-btn');
+  if (!btn) return;
+  const ripple = document.createElement('span');
+  ripple.className = 'ripple-effect';
+  const rect = btn.getBoundingClientRect();
+  ripple.style.left = (e.clientX - rect.left) + 'px';
+  ripple.style.top = (e.clientY - rect.top) + 'px';
+  btn.style.position = 'relative';
+  btn.style.overflow = 'hidden';
+  btn.appendChild(ripple);
+  setTimeout(() => ripple.remove(), 600);
+});
+
+// ========== LIKE PARTICLES ==========
+function spawnLikeParticles(btn) {
+  const rect = btn.getBoundingClientRect();
+  const colors = ['#ec4899', '#f43f5e', '#ff6b6b', '#ff8787', '#ffa8a8'];
+  for (let i = 0; i < 8; i++) {
+    const p = document.createElement('div');
+    p.className = 'like-particle';
+    p.style.left = rect.left + rect.width/2 + 'px';
+    p.style.top = rect.top + rect.height/2 + 'px';
+    p.style.background = colors[Math.floor(Math.random()*colors.length)];
+    const angle = (Math.PI * 2 * i) / 8;
+    const dist = 20 + Math.random() * 30;
+    p.style.setProperty('--tx', Math.cos(angle) * dist + 'px');
+    p.style.setProperty('--ty', Math.sin(angle) * dist + 'px');
+    document.body.appendChild(p);
+    setTimeout(() => p.remove(), 700);
+  }
+}
+
 // Start
 init();
 
-// Add sample posts if first visit
-if (data.posts.length === 0 && !localStorage.getItem('inboby_welcomed')) {
+// Add sample data if first visit
+if (!localStorage.getItem('inboby_welcomed')) {
   localStorage.setItem('inboby_welcomed', '1');
-  data.posts = [
-    { id: 1, text: 'ברוכים הבאים ל-InBoby! 🎉🚀\nהפלטפורמה שלכם, המקום שלכם.\nתתחילו לפרסם, ליצור הגרלות ולהנות!', image: '', video: '', time: new Date().toISOString(), likes: 5 },
-    { id: 2, text: 'InBoby v2.0 יצא לדרך! 💜\nיש לנו פיד, הגרלות, סרטונים, שורטים, אפקטים ודארק מוד.\nמה עוד תרצו? ספרו לנו! 👇', image: '', video: '', time: new Date(Date.now() - 300000).toISOString(), likes: 3 }
-  ];
   data.raffles = [
     { id: 3, name: '🎮 הגרלת סקין נדיר!', desc: 'השתתפו בהגרלה ותנסו לזכות בסקין הכי נדיר במשחק!', prize: 'סקין לג\'נדרי', participants: 12, active: true, joined: false, winner: '' }
   ];
