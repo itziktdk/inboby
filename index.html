@@ -58,10 +58,14 @@ body.no-animations, body.no-animations * {
   animation: none !important;
 }
 
-/* Scrollbar */
 ::-webkit-scrollbar { width: 8px; }
 ::-webkit-scrollbar-track { background: var(--bg-secondary); }
 ::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 4px; }
+
+/* ========== SVG ICON HELPERS ========== */
+.svg-icon { width: 22px; height: 22px; fill: currentColor; flex-shrink: 0; }
+.svg-icon-sm { width: 16px; height: 16px; fill: currentColor; flex-shrink: 0; }
+.svg-icon-lg { width: 28px; height: 28px; fill: currentColor; flex-shrink: 0; }
 
 /* ========== ANIMATED BACKGROUND ========== */
 .bg-orbs {
@@ -146,7 +150,8 @@ body.no-animations, body.no-animations * {
   position: fixed; bottom: 0; left: 0; right: 0; z-index: 100;
   background: rgba(15, 15, 26, 0.9); backdrop-filter: blur(20px);
   border-top: 1px solid var(--border);
-  display: flex; justify-content: space-around; padding: 8px 0 calc(8px + env(safe-area-inset-bottom));
+  display: flex; justify-content: space-around; align-items: flex-end;
+  padding: 8px 0 calc(8px + env(safe-area-inset-bottom));
 }
 [data-theme="light"] .nav-bar { background: rgba(245, 240, 255, 0.9); }
 
@@ -163,7 +168,77 @@ body.no-animations, body.no-animations * {
   background: var(--gradient-1); border-radius: 2px;
 }
 .nav-item:hover { color: var(--accent-light); }
-.nav-icon { font-size: 22px; }
+.nav-icon { font-size: 22px; display: flex; align-items: center; justify-content: center; }
+
+/* ========== CREATE BUTTON (TikTok style) ========== */
+.create-btn-wrapper {
+  position: relative; display: flex; flex-direction: column; align-items: center; gap: 4px;
+  margin-top: -24px;
+}
+.create-btn {
+  width: 56px; height: 56px; border-radius: 50%; border: none;
+  background: linear-gradient(135deg, #ec4899, #7c3aed, #3b82f6);
+  background-size: 200% 200%;
+  animation: createBtnGradient 3s ease infinite;
+  color: white; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 4px 20px rgba(124, 58, 237, 0.5), 0 0 40px rgba(124, 58, 237, 0.2);
+  transition: all var(--transition);
+  position: relative;
+}
+.create-btn::before {
+  content: ''; position: absolute; inset: -3px; border-radius: 50%;
+  background: linear-gradient(135deg, #ec4899, #7c3aed, #3b82f6);
+  background-size: 200% 200%;
+  animation: createBtnGradient 3s ease infinite;
+  z-index: -1; opacity: 0.4; filter: blur(8px);
+}
+.create-btn:hover { transform: scale(1.1) translateY(-2px); box-shadow: 0 6px 30px rgba(124, 58, 237, 0.6); }
+.create-btn:active { transform: scale(0.95); }
+.create-btn .svg-icon { width: 28px; height: 28px; }
+.create-btn-label { font-family: 'Rubik'; font-size: 11px; font-weight: 600; color: var(--accent-light); }
+
+@keyframes createBtnGradient {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+/* Create popup menu */
+.create-popup {
+  position: fixed; bottom: 90px; left: 50%; transform: translateX(-50%) translateY(20px);
+  background: var(--bg-card); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 12px; z-index: 150;
+  display: none; flex-direction: column; gap: 4px; min-width: 200px;
+  box-shadow: var(--shadow), 0 0 40px var(--accent-glow);
+  animation: popupIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.create-popup.show { display: flex; }
+@keyframes popupIn {
+  from { opacity: 0; transform: translateX(-50%) translateY(20px) scale(0.9); }
+  to { opacity: 1; transform: translateX(-50%) translateY(0) scale(1); }
+}
+.create-popup-item {
+  display: flex; align-items: center; gap: 12px; padding: 12px 16px;
+  border-radius: var(--radius-sm); cursor: pointer; border: none;
+  background: none; color: var(--text-primary); font-family: 'Rubik';
+  font-size: 15px; font-weight: 500; transition: all var(--transition);
+  width: 100%; text-align: right;
+}
+.create-popup-item:hover { background: var(--bg-hover); }
+.create-popup-item .popup-icon {
+  width: 36px; height: 36px; border-radius: 10px; display: flex;
+  align-items: center; justify-content: center; flex-shrink: 0;
+}
+.create-popup-item:nth-child(1) .popup-icon { background: rgba(124, 58, 237, 0.2); color: #a78bfa; }
+.create-popup-item:nth-child(2) .popup-icon { background: rgba(236, 72, 153, 0.2); color: #ec4899; }
+.create-popup-item:nth-child(3) .popup-icon { background: rgba(59, 130, 246, 0.2); color: #3b82f6; }
+.create-popup-item:nth-child(4) .popup-icon { background: rgba(34, 197, 94, 0.2); color: #22c55e; }
+.create-popup-overlay {
+  position: fixed; inset: 0; z-index: 140; background: rgba(0,0,0,0.3);
+  display: none;
+}
+.create-popup-overlay.show { display: block; }
 
 /* ========== PAGES ========== */
 .page { display: none; padding: 20px; padding-bottom: 90px; max-width: 640px; margin: 0 auto; }
@@ -250,6 +325,13 @@ body.no-animations, body.no-animations * {
   width: 100%; border-radius: var(--radius-sm); margin-bottom: 12px;
   max-height: 400px; object-fit: cover;
 }
+.post-video-wrapper {
+  position: relative; width: 100%; border-radius: var(--radius-sm);
+  margin-bottom: 12px; overflow: hidden; background: #000;
+}
+.post-video-wrapper video {
+  width: 100%; max-height: 400px; display: block; border-radius: var(--radius-sm);
+}
 .post-actions { display: flex; gap: 8px; }
 .post-action-btn {
   background: var(--bg-secondary); border: 1px solid var(--border);
@@ -274,13 +356,19 @@ body.no-animations, body.no-animations * {
 .modal {
   background: var(--bg-card); border: 1px solid var(--border);
   border-radius: var(--radius); padding: 24px; width: 100%; max-width: 500px;
+  max-height: 90vh; overflow-y: auto;
   box-shadow: var(--shadow); animation: modalIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 @keyframes modalIn {
   from { opacity: 0; transform: scale(0.9) translateY(20px); }
   to { opacity: 1; transform: scale(1) translateY(0); }
 }
-.modal h2 { font-size: 20px; margin-bottom: 16px; background: var(--gradient-1); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+.modal h2 {
+  font-size: 20px; margin-bottom: 16px; background: var(--gradient-1);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+  display: flex; align-items: center; gap: 8px;
+}
+.modal h2 .svg-icon { fill: var(--accent); }
 .modal textarea {
   width: 100%; min-height: 120px; background: var(--bg-secondary);
   border: 1px solid var(--border); border-radius: var(--radius-sm);
@@ -294,12 +382,16 @@ body.no-animations, body.no-animations * {
   margin-top: 12px; border-radius: var(--radius-sm); max-height: 200px;
   width: 100%; object-fit: cover; display: none;
 }
+.modal-video-preview {
+  margin-top: 12px; border-radius: var(--radius-sm); max-height: 200px;
+  width: 100%; display: none;
+}
 
 .modal-actions { display: flex; gap: 10px; margin-top: 16px; justify-content: flex-end; }
 .btn {
   padding: 10px 24px; border-radius: 24px; font-family: 'Rubik';
   font-weight: 600; font-size: 14px; cursor: pointer; border: none;
-  transition: all var(--transition);
+  transition: all var(--transition); display: flex; align-items: center; gap: 6px;
 }
 .btn-primary { background: var(--gradient-1); color: white; box-shadow: 0 4px 15px var(--accent-glow); }
 .btn-primary:hover { transform: translateY(-2px); }
@@ -312,6 +404,135 @@ body.no-animations, body.no-animations * {
   transition: all var(--transition);
 }
 .btn-image:hover { border-color: var(--accent); color: var(--accent-light); }
+
+/* ========== FACE EFFECTS GRID ========== */
+.effects-section { margin-top: 16px; }
+.effects-section h3 {
+  font-size: 16px; font-weight: 600; margin-bottom: 12px;
+  display: flex; align-items: center; gap: 8px;
+}
+.effects-grid {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 16px;
+}
+.effect-card {
+  aspect-ratio: 1; border-radius: var(--radius-sm); border: 2px solid var(--border);
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  cursor: pointer; transition: all var(--transition); position: relative; overflow: hidden;
+  font-size: 13px; font-weight: 600; gap: 6px; padding: 8px;
+}
+.effect-card:hover { border-color: var(--accent); transform: scale(1.05); }
+.effect-card.selected { border-color: var(--accent); box-shadow: 0 0 20px var(--accent-glow); }
+.effect-card .effect-preview {
+  width: 40px; height: 40px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center; font-size: 24px;
+}
+
+/* Effect animations */
+.effect-rainbow .effect-preview {
+  background: linear-gradient(135deg, red, orange, yellow, green, blue, violet);
+  background-size: 400% 400%;
+  animation: rainbowShift 2s ease infinite;
+}
+@keyframes rainbowShift {
+  0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; }
+}
+
+.effect-neon .effect-preview {
+  background: #000; box-shadow: 0 0 10px #0ff, 0 0 20px #0ff, 0 0 30px #0ff;
+  animation: neonPulse 1.5s ease-in-out infinite;
+}
+@keyframes neonPulse {
+  0%, 100% { box-shadow: 0 0 10px #0ff, 0 0 20px #0ff; }
+  50% { box-shadow: 0 0 20px #0ff, 0 0 40px #0ff, 0 0 60px #0ff; }
+}
+
+.effect-sparkle .effect-preview {
+  background: var(--gradient-2);
+  animation: sparkleAnim 1s ease infinite;
+}
+@keyframes sparkleAnim {
+  0%, 100% { transform: scale(1); filter: brightness(1); }
+  50% { transform: scale(1.1); filter: brightness(1.5); }
+}
+
+.effect-pixel .effect-preview {
+  background: #1a1a2e;
+  image-rendering: pixelated;
+  box-shadow: inset 0 0 0 2px #7c3aed, inset 4px 4px 0 #3b82f6, inset -4px -4px 0 #ec4899;
+  animation: pixelGlitch 0.8s steps(3) infinite;
+}
+@keyframes pixelGlitch {
+  0% { transform: translate(0); } 33% { transform: translate(-2px, 1px); }
+  66% { transform: translate(2px, -1px); } 100% { transform: translate(0); }
+}
+
+.effect-comic .effect-preview {
+  background: #fff; border: 3px solid #000;
+  box-shadow: 3px 3px 0 #000;
+  animation: comicPop 1.2s ease infinite;
+}
+@keyframes comicPop {
+  0%, 100% { transform: scale(1) rotate(0deg); }
+  25% { transform: scale(1.1) rotate(-3deg); }
+  75% { transform: scale(0.95) rotate(3deg); }
+}
+
+.effect-vintage .effect-preview {
+  background: linear-gradient(135deg, #d4a574, #c19660);
+  filter: sepia(0.8);
+  animation: vintageFlicker 2s ease infinite;
+}
+@keyframes vintageFlicker {
+  0%, 100% { opacity: 1; filter: sepia(0.8); }
+  50% { opacity: 0.85; filter: sepia(1) brightness(0.9); }
+}
+
+.effect-glitch .effect-preview {
+  background: #16213e; position: relative;
+  animation: glitchMain 1s steps(2) infinite;
+}
+.effect-glitch .effect-preview::before, .effect-glitch .effect-preview::after {
+  content: ''; position: absolute; inset: 0; border-radius: 50%;
+}
+.effect-glitch .effect-preview::before {
+  background: rgba(255,0,0,0.3); animation: glitchR 0.5s steps(2) infinite;
+}
+.effect-glitch .effect-preview::after {
+  background: rgba(0,255,255,0.3); animation: glitchB 0.5s steps(2) infinite reverse;
+}
+@keyframes glitchMain { 0%{transform:translate(0)} 50%{transform:translate(2px,-1px)} }
+@keyframes glitchR { 0%{transform:translate(0)} 50%{transform:translate(-3px,1px)} }
+@keyframes glitchB { 0%{transform:translate(0)} 50%{transform:translate(3px,-1px)} }
+
+.effect-fire .effect-preview {
+  background: linear-gradient(0deg, #ff4500, #ff8c00, #ffd700);
+  background-size: 100% 200%;
+  animation: fireAnim 0.8s ease infinite;
+}
+@keyframes fireAnim {
+  0% { background-position: 50% 100%; } 50% { background-position: 50% 0%; } 100% { background-position: 50% 100%; }
+}
+
+.effect-ice .effect-preview {
+  background: linear-gradient(135deg, #a8edea, #74b9ff, #a29bfe);
+  background-size: 200% 200%;
+  animation: iceShimmer 2s ease infinite;
+  box-shadow: 0 0 15px rgba(116, 185, 255, 0.4);
+}
+@keyframes iceShimmer {
+  0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; }
+}
+
+/* ========== GALLERY BUTTON ========== */
+.gallery-btn {
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  width: 100%; padding: 14px; border-radius: var(--radius-sm);
+  background: var(--bg-secondary); border: 2px dashed var(--border);
+  color: var(--text-secondary); font-family: 'Rubik'; font-size: 15px;
+  font-weight: 600; cursor: pointer; transition: all var(--transition);
+  margin-top: 12px;
+}
+.gallery-btn:hover { border-color: var(--accent); color: var(--accent-light); background: var(--bg-hover); }
 
 /* ========== RAFFLES ========== */
 .raffle-card {
@@ -361,7 +582,10 @@ body.no-animations, body.no-animations * {
   background: var(--bg-card); border: 1px solid var(--border);
   border-radius: var(--radius); padding: 20px; margin-bottom: 16px;
 }
-.settings-section h3 { font-size: 16px; font-weight: 600; margin-bottom: 16px; }
+.settings-section h3 {
+  font-size: 16px; font-weight: 600; margin-bottom: 16px;
+  display: flex; align-items: center; gap: 8px;
+}
 .setting-item {
   display: flex; align-items: center; justify-content: space-between;
   padding: 14px 0; border-bottom: 1px solid var(--border);
@@ -395,13 +619,16 @@ body.no-animations, body.no-animations * {
   font-size: 22px; font-weight: 700;
   background: var(--gradient-1); -webkit-background-clip: text;
   -webkit-text-fill-color: transparent; background-clip: text;
+  display: flex; align-items: center; gap: 8px;
 }
+.section-title .svg-icon { fill: var(--accent); }
 
 /* ========== EMPTY STATE ========== */
 .empty-state {
   text-align: center; padding: 60px 20px; color: var(--text-secondary);
 }
-.empty-state .empty-icon { font-size: 64px; margin-bottom: 16px; opacity: 0.5; }
+.empty-state .empty-icon { font-size: 64px; margin-bottom: 16px; opacity: 0.5; display: flex; justify-content: center; }
+.empty-state .empty-icon .svg-icon { width: 64px; height: 64px; fill: var(--text-secondary); }
 .empty-state h3 { font-size: 18px; margin-bottom: 8px; color: var(--text-primary); }
 .empty-state p { font-size: 14px; }
 
@@ -419,6 +646,7 @@ body.no-animations, body.no-animations * {
   .profile-stats { gap: 20px; }
   .new-post-btn span { display: none; }
   .new-post-btn { padding: 8px 12px; }
+  .effects-grid { grid-template-columns: repeat(3, 1fr); gap: 8px; }
 }
 
 /* ========== EDIT PROFILE MODAL ========== */
@@ -457,6 +685,29 @@ body.no-animations, body.no-animations * {
 </head>
 <body>
 
+<!-- SVG Sprite (hidden) -->
+<svg xmlns="http://www.w3.org/2000/svg" style="display:none">
+  <symbol id="icon-home" viewBox="0 0 24 24"><path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-4 0a1 1 0 01-1-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 01-1 1h-2z" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="icon-trophy" viewBox="0 0 24 24"><path d="M5 3h14v4a7 7 0 01-14 0V3zm0 0H3v3a3 3 0 003 3m8-6h5v3a3 3 0 01-3 3M12 14v3m-4 4h8m-6 0v-4m4 4v-4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="icon-user" viewBox="0 0 24 24"><path d="M16 7a4 4 0 11-8 0 4 4 0 018 0zm-4 7c-4.418 0-8 1.79-8 4v2h16v-2c0-2.21-3.582-4-8-4z" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="icon-settings" viewBox="0 0 24 24"><path d="M12 15a3 3 0 100-6 3 3 0 000 6z" fill="none" stroke="currentColor" stroke-width="2"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 01-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="icon-plus" viewBox="0 0 24 24"><path d="M12 5v14m-7-7h14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/></symbol>
+  <symbol id="icon-heart" viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78L12 21.23l8.84-8.84a5.5 5.5 0 000-7.78z" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="icon-heart-filled" viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78L12 21.23l8.84-8.84a5.5 5.5 0 000-7.78z" fill="currentColor"/></symbol>
+  <symbol id="icon-trash" viewBox="0 0 24 24"><path d="M3 6h18m-2 0v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="icon-camera" viewBox="0 0 24 24"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><circle cx="12" cy="13" r="4" fill="none" stroke="currentColor" stroke-width="2"/></symbol>
+  <symbol id="icon-moon" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="icon-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 1v2m0 18v2M4.22 4.22l1.42 1.42m12.72 12.72l1.42 1.42M1 12h2m18 0h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></symbol>
+  <symbol id="icon-edit" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="icon-image" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2" ry="2" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="8.5" cy="8.5" r="1.5" fill="currentColor"/><path d="M21 15l-5-5L5 21" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="icon-video" viewBox="0 0 24 24"><polygon points="23 7 16 12 23 17 23 7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2" fill="none" stroke="currentColor" stroke-width="2"/></symbol>
+  <symbol id="icon-zap" viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="icon-palette" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10c1.1 0 2-.9 2-2 0-.51-.2-.98-.52-1.34-.31-.35-.48-.82-.48-1.16 0-1.1.9-2 2-2h2.36C19.86 15.5 22 13.36 22 10.5 22 5.81 17.52 2 12 2z" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="6.5" cy="11.5" r="1.5" fill="currentColor"/><circle cx="9.5" cy="7.5" r="1.5" fill="currentColor"/><circle cx="14.5" cy="7.5" r="1.5" fill="currentColor"/><circle cx="17.5" cy="11.5" r="1.5" fill="currentColor"/></symbol>
+  <symbol id="icon-film" viewBox="0 0 24 24"><rect x="2" y="2" width="20" height="20" rx="2.18" ry="2.18" fill="none" stroke="currentColor" stroke-width="2"/><path d="M7 2v20M17 2v20M2 12h20M2 7h5M2 17h5M17 17h5M17 7h5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="icon-play" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3" fill="currentColor"/></symbol>
+  <symbol id="icon-sparkles" viewBox="0 0 24 24"><path d="M12 2l2.09 6.26L20 10l-5.91 1.74L12 18l-2.09-6.26L4 10l5.91-1.74L12 2z" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M20 16l1 3 3 1-3 1-1 3-1-3-3-1 3-1 1-3z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+</svg>
+
 <!-- Background orbs -->
 <div class="bg-orbs">
   <div class="orb"></div>
@@ -475,9 +726,11 @@ body.no-animations, body.no-animations * {
   </a>
   <div class="header-actions">
     <button class="new-post-btn" onclick="openNewPost()">
-      ✏️ <span>פוסט חדש</span>
+      <svg class="svg-icon-sm"><use href="#icon-edit"/></svg> <span>פוסט חדש</span>
     </button>
-    <button class="icon-btn" onclick="toggleTheme()" id="themeBtn" title="מצב כהה/בהיר">🌙</button>
+    <button class="icon-btn" onclick="toggleTheme()" id="themeBtn" title="מצב כהה/בהיר">
+      <svg class="svg-icon" id="themeBtnIcon"><use href="#icon-moon"/></svg>
+    </button>
   </div>
 </header>
 
@@ -486,13 +739,13 @@ body.no-animations, body.no-animations * {
   <!-- Feed Page -->
   <div class="page active" id="page-feed">
     <div class="section-header">
-      <h2 class="section-title">🏠 הפיד שלך</h2>
+      <h2 class="section-title"><svg class="svg-icon"><use href="#icon-home"/></svg> הפיד שלך</h2>
     </div>
     <div id="posts-container"></div>
     <div class="empty-state" id="empty-feed" style="display:none">
-      <div class="empty-icon">📝</div>
+      <div class="empty-icon"><svg class="svg-icon"><use href="#icon-edit"/></svg></div>
       <h3>אין עדיין פוסטים</h3>
-      <p>תהיה הראשון לפרסם! לחץ על "פוסט חדש" ⬆️</p>
+      <p>תהיה הראשון לפרסם! לחץ על כפתור ה-+ למטה</p>
     </div>
   </div>
 
@@ -501,18 +754,18 @@ body.no-animations, body.no-animations * {
     <div class="profile-hero">
       <div class="profile-avatar-wrapper">
         <div class="profile-avatar" id="profileAvatar" onclick="changeAvatar()">😎</div>
-        <div class="profile-avatar-edit" onclick="changeAvatar()">📷</div>
+        <div class="profile-avatar-edit" onclick="changeAvatar()"><svg class="svg-icon-sm" style="fill:white"><use href="#icon-camera"/></svg></div>
       </div>
       <div class="profile-name" id="profileName">InBoby User</div>
       <div class="profile-username" id="profileUsername">@inboby</div>
-      <div class="profile-bio" id="profileBio" onclick="editProfile()">לחץ כדי לערוך את הביו שלך ✏️</div>
+      <div class="profile-bio" id="profileBio" onclick="editProfile()">לחץ כדי לערוך את הביו שלך</div>
       <div class="profile-stats">
         <div class="stat"><div class="stat-num" id="statPosts">0</div><div class="stat-label">פוסטים</div></div>
         <div class="stat"><div class="stat-num" id="statLikes">0</div><div class="stat-label">לייקים</div></div>
         <div class="stat"><div class="stat-num" id="statRaffles">0</div><div class="stat-label">הגרלות</div></div>
       </div>
     </div>
-    <button class="btn btn-primary" style="width:100%;margin-bottom:16px" onclick="editProfile()">✏️ ערוך פרופיל</button>
+    <button class="btn btn-primary" style="width:100%;margin-bottom:16px" onclick="editProfile()"><svg class="svg-icon-sm" style="fill:white"><use href="#icon-edit"/></svg> ערוך פרופיל</button>
     <div class="section-header"><h2 class="section-title">הפוסטים שלי</h2></div>
     <div id="my-posts-container"></div>
   </div>
@@ -520,12 +773,12 @@ body.no-animations, body.no-animations * {
   <!-- Raffles Page -->
   <div class="page" id="page-raffles">
     <div class="section-header">
-      <h2 class="section-title">🎰 הגרלות</h2>
-      <button class="btn btn-primary" onclick="openNewRaffle()">+ הגרלה חדשה</button>
+      <h2 class="section-title"><svg class="svg-icon"><use href="#icon-trophy"/></svg> הגרלות</h2>
+      <button class="btn btn-primary" onclick="openNewRaffle()"><svg class="svg-icon-sm" style="fill:white"><use href="#icon-plus"/></svg> הגרלה חדשה</button>
     </div>
     <div id="raffles-container"></div>
     <div class="empty-state" id="empty-raffles" style="display:none">
-      <div class="empty-icon">🎰</div>
+      <div class="empty-icon"><svg class="svg-icon"><use href="#icon-trophy"/></svg></div>
       <h3>אין עדיין הגרלות</h3>
       <p>צור הגרלה ראשונה ותן לאנשים להשתתף!</p>
     </div>
@@ -533,9 +786,9 @@ body.no-animations, body.no-animations * {
 
   <!-- Settings Page -->
   <div class="page" id="page-settings">
-    <div class="section-header"><h2 class="section-title">⚙️ הגדרות</h2></div>
+    <div class="section-header"><h2 class="section-title"><svg class="svg-icon"><use href="#icon-settings"/></svg> הגדרות</h2></div>
     <div class="settings-section">
-      <h3>🎨 מראה</h3>
+      <h3><svg class="svg-icon-sm"><use href="#icon-palette"/></svg> מראה</h3>
       <div class="setting-item">
         <div class="setting-info"><h4>מצב כהה</h4><p>עיצוב כהה לחוויה נוחה יותר</p></div>
         <label class="toggle"><input type="checkbox" id="darkModeToggle" checked onchange="toggleThemeFromSettings()"><span class="toggle-slider"></span></label>
@@ -546,7 +799,7 @@ body.no-animations, body.no-animations * {
       </div>
     </div>
     <div class="settings-section">
-      <h3>👤 חשבון</h3>
+      <h3><svg class="svg-icon-sm"><use href="#icon-user"/></svg> חשבון</h3>
       <div class="setting-item">
         <div class="setting-info"><h4>ערוך פרופיל</h4><p>שנה שם, ביו ותמונת פרופיל</p></div>
         <button class="btn btn-secondary" onclick="editProfile()">ערוך</button>
@@ -557,10 +810,10 @@ body.no-animations, body.no-animations * {
       </div>
     </div>
     <div class="settings-section">
-      <h3>ℹ️ אודות</h3>
+      <h3><svg class="svg-icon-sm"><use href="#icon-sparkles"/></svg> אודות</h3>
       <div class="setting-item">
         <div class="setting-info">
-          <h4>InBoby v1.0</h4>
+          <h4>InBoby v2.0</h4>
           <p>נבנה עם ❤️ במיוחד בשביל לירוי 🚀</p>
         </div>
       </div>
@@ -571,27 +824,58 @@ body.no-animations, body.no-animations * {
 <!-- Bottom Navigation -->
 <nav class="nav-bar">
   <button class="nav-item active" onclick="switchPage('feed')" data-page="feed">
-    <span class="nav-icon">🏠</span>בית
+    <span class="nav-icon"><svg class="svg-icon"><use href="#icon-home"/></svg></span>בית
   </button>
   <button class="nav-item" onclick="switchPage('raffles')" data-page="raffles">
-    <span class="nav-icon">🎰</span>הגרלות
+    <span class="nav-icon"><svg class="svg-icon"><use href="#icon-trophy"/></svg></span>הגרלות
   </button>
+  <div class="create-btn-wrapper">
+    <button class="create-btn" onclick="toggleCreatePopup()" id="createBtn">
+      <svg class="svg-icon" style="fill:white"><use href="#icon-plus"/></svg>
+    </button>
+    <span class="create-btn-label">צור</span>
+  </div>
   <button class="nav-item" onclick="switchPage('profile')" data-page="profile">
-    <span class="nav-icon">👤</span>פרופיל
+    <span class="nav-icon"><svg class="svg-icon"><use href="#icon-user"/></svg></span>פרופיל
   </button>
   <button class="nav-item" onclick="switchPage('settings')" data-page="settings">
-    <span class="nav-icon">⚙️</span>הגדרות
+    <span class="nav-icon"><svg class="svg-icon"><use href="#icon-settings"/></svg></span>הגדרות
   </button>
 </nav>
+
+<!-- Create Popup Overlay -->
+<div class="create-popup-overlay" id="createPopupOverlay" onclick="closeCreatePopup()"></div>
+
+<!-- Create Popup Menu -->
+<div class="create-popup" id="createPopup">
+  <button class="create-popup-item" onclick="closeCreatePopup();openNewPost()">
+    <div class="popup-icon"><svg class="svg-icon"><use href="#icon-edit"/></svg></div>
+    <span>פוסט</span>
+  </button>
+  <button class="create-popup-item" onclick="closeCreatePopup();openVideoModal()">
+    <div class="popup-icon"><svg class="svg-icon"><use href="#icon-video"/></svg></div>
+    <span>סרטון</span>
+  </button>
+  <button class="create-popup-item" onclick="closeCreatePopup();openShortModal()">
+    <div class="popup-icon"><svg class="svg-icon"><use href="#icon-zap"/></svg></div>
+    <span>שורט</span>
+  </button>
+  <button class="create-popup-item" onclick="closeCreatePopup();openNewRaffle()">
+    <div class="popup-icon"><svg class="svg-icon"><use href="#icon-trophy"/></svg></div>
+    <span>הגרלה</span>
+  </button>
+</div>
 
 <!-- New Post Modal -->
 <div class="modal-overlay" id="newPostModal">
   <div class="modal">
-    <h2>✏️ פוסט חדש</h2>
+    <h2><svg class="svg-icon"><use href="#icon-edit"/></svg> פוסט חדש</h2>
     <textarea id="postText" placeholder="מה עובר לך בראש? 🤔" rows="4"></textarea>
     <img class="modal-image-preview" id="postImagePreview">
+    <video class="modal-video-preview" id="postVideoPreview" controls></video>
     <div style="display:flex;gap:10px;margin-top:12px;flex-wrap:wrap">
-      <label class="btn-image">📷 הוסף תמונה<input type="file" accept="image/*" id="postImageInput" style="display:none" onchange="previewPostImage(event)"></label>
+      <label class="btn-image"><svg class="svg-icon-sm"><use href="#icon-camera"/></svg> הוסף תמונה<input type="file" accept="image/*" id="postImageInput" style="display:none" onchange="previewPostImage(event)"></label>
+      <label class="btn-image"><svg class="svg-icon-sm"><use href="#icon-video"/></svg> הוסף סרטון<input type="file" accept="video/mp4,video/webm,video/quicktime" id="postVideoInput" style="display:none" onchange="previewPostVideo(event)"></label>
     </div>
     <div class="modal-actions">
       <button class="btn btn-secondary" onclick="closeNewPost()">ביטול</button>
@@ -600,10 +884,74 @@ body.no-animations, body.no-animations * {
   </div>
 </div>
 
+<!-- Video/Short Modal -->
+<div class="modal-overlay" id="videoModal">
+  <div class="modal">
+    <h2 id="videoModalTitle"><svg class="svg-icon"><use href="#icon-video"/></svg> סרטון חדש</h2>
+    <textarea id="videoText" placeholder="תיאור לסרטון... 🎬" rows="3"></textarea>
+
+    <!-- Face Effects Section -->
+    <div class="effects-section">
+      <h3><svg class="svg-icon-sm"><use href="#icon-sparkles"/></svg> אפקטים</h3>
+      <div class="effects-grid">
+        <div class="effect-card effect-rainbow" onclick="selectEffect(this,'rainbow')">
+          <div class="effect-preview"></div>
+          <span>Rainbow</span>
+        </div>
+        <div class="effect-card effect-neon" onclick="selectEffect(this,'neon')">
+          <div class="effect-preview"></div>
+          <span>Neon</span>
+        </div>
+        <div class="effect-card effect-sparkle" onclick="selectEffect(this,'sparkle')">
+          <div class="effect-preview"></div>
+          <span>Sparkle</span>
+        </div>
+        <div class="effect-card effect-pixel" onclick="selectEffect(this,'pixel')">
+          <div class="effect-preview"></div>
+          <span>Pixel</span>
+        </div>
+        <div class="effect-card effect-comic" onclick="selectEffect(this,'comic')">
+          <div class="effect-preview"></div>
+          <span>Comic</span>
+        </div>
+        <div class="effect-card effect-vintage" onclick="selectEffect(this,'vintage')">
+          <div class="effect-preview"></div>
+          <span>Vintage</span>
+        </div>
+        <div class="effect-card effect-glitch" onclick="selectEffect(this,'glitch')">
+          <div class="effect-preview"></div>
+          <span>Glitch</span>
+        </div>
+        <div class="effect-card effect-fire" onclick="selectEffect(this,'fire')">
+          <div class="effect-preview"></div>
+          <span>Fire</span>
+        </div>
+        <div class="effect-card effect-ice" onclick="selectEffect(this,'ice')">
+          <div class="effect-preview"></div>
+          <span>Ice</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Gallery Button -->
+    <label class="gallery-btn" id="videoGalleryBtn">
+      <svg class="svg-icon"><use href="#icon-image"/></svg> בחר מהגלריה
+      <input type="file" accept="video/mp4,video/webm,video/quicktime,image/*" id="videoFileInput" style="display:none" onchange="previewVideoFile(event)">
+    </label>
+    <video class="modal-video-preview" id="videoFilePreview" controls></video>
+    <img class="modal-image-preview" id="videoImagePreview">
+
+    <div class="modal-actions">
+      <button class="btn btn-secondary" onclick="closeVideoModal()">ביטול</button>
+      <button class="btn btn-primary" onclick="createVideoPost()">פרסם 🚀</button>
+    </div>
+  </div>
+</div>
+
 <!-- New Raffle Modal -->
 <div class="modal-overlay" id="newRaffleModal">
   <div class="modal">
-    <h2>🎰 הגרלה חדשה</h2>
+    <h2><svg class="svg-icon"><use href="#icon-trophy"/></svg> הגרלה חדשה</h2>
     <div class="form-group"><label>שם ההגרלה</label><input type="text" id="raffleName" placeholder="למשל: פרס מגניב!"></div>
     <div class="form-group"><label>תיאור</label><textarea id="raffleDesc" placeholder="מה הפרס? מה הכללים?" rows="3"></textarea></div>
     <div class="form-group"><label>פרס</label><input type="text" id="rafflePrize" placeholder="למשל: סקין נדיר, גיפט קארד..."></div>
@@ -617,7 +965,7 @@ body.no-animations, body.no-animations * {
 <!-- Edit Profile Modal -->
 <div class="modal-overlay" id="editProfileModal">
   <div class="modal">
-    <h2>✏️ ערוך פרופיל</h2>
+    <h2><svg class="svg-icon"><use href="#icon-edit"/></svg> ערוך פרופיל</h2>
     <input class="edit-profile-field" id="editName" placeholder="השם שלך">
     <input class="edit-profile-field" id="editUsername" placeholder="@שם_משתמש">
     <textarea class="edit-profile-field" id="editBio" placeholder="ספר על עצמך..." rows="3"></textarea>
@@ -660,7 +1008,8 @@ function switchPage(page) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.getElementById('page-' + page).classList.add('active');
   document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-  document.querySelector(`[data-page="${page}"]`).classList.add('active');
+  const navEl = document.querySelector(`[data-page="${page}"]`);
+  if (navEl) navEl.classList.add('active');
   if (page === 'profile') { renderMyPosts(); updateStats(); }
 }
 
@@ -668,7 +1017,7 @@ function switchPage(page) {
 function applyTheme() {
   const dark = data.settings.darkMode;
   document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light');
-  document.getElementById('themeBtn').textContent = dark ? '🌙' : '☀️';
+  document.getElementById('themeBtnIcon').innerHTML = dark ? '<use href="#icon-moon"/>' : '<use href="#icon-sun"/>';
   document.getElementById('darkModeToggle').checked = dark;
 }
 function toggleTheme() { data.settings.darkMode = !data.settings.darkMode; saveData(data); applyTheme(); }
@@ -688,14 +1037,61 @@ function showToast(msg) {
   setTimeout(() => t.classList.remove('show'), 2500);
 }
 
+// ========== CREATE POPUP ==========
+function toggleCreatePopup() {
+  const popup = document.getElementById('createPopup');
+  const overlay = document.getElementById('createPopupOverlay');
+  const isOpen = popup.classList.contains('show');
+  if (isOpen) { closeCreatePopup(); } else {
+    popup.classList.add('show');
+    overlay.classList.add('show');
+  }
+}
+function closeCreatePopup() {
+  document.getElementById('createPopup').classList.remove('show');
+  document.getElementById('createPopupOverlay').classList.remove('show');
+}
+
 // ========== POSTS ==========
-function openNewPost() { document.getElementById('newPostModal').classList.add('show'); document.getElementById('postText').focus(); }
-function closeNewPost() { document.getElementById('newPostModal').classList.remove('show'); document.getElementById('postText').value = ''; document.getElementById('postImagePreview').style.display = 'none'; document.getElementById('postImageInput').value = ''; }
+function openNewPost() {
+  document.getElementById('newPostModal').classList.add('show');
+  document.getElementById('postText').focus();
+}
+function closeNewPost() {
+  document.getElementById('newPostModal').classList.remove('show');
+  document.getElementById('postText').value = '';
+  document.getElementById('postImagePreview').style.display = 'none';
+  document.getElementById('postVideoPreview').style.display = 'none';
+  document.getElementById('postImageInput').value = '';
+  document.getElementById('postVideoInput').value = '';
+  currentPostVideo = '';
+}
+
+let currentPostVideo = '';
 
 function previewPostImage(e) {
   const file = e.target.files[0]; if (!file) return;
+  // Clear video if image selected
+  document.getElementById('postVideoPreview').style.display = 'none';
+  document.getElementById('postVideoInput').value = '';
+  currentPostVideo = '';
   const reader = new FileReader();
   reader.onload = ev => { const img = document.getElementById('postImagePreview'); img.src = ev.target.result; img.style.display = 'block'; };
+  reader.readAsDataURL(file);
+}
+
+function previewPostVideo(e) {
+  const file = e.target.files[0]; if (!file) return;
+  // Clear image if video selected
+  document.getElementById('postImagePreview').style.display = 'none';
+  document.getElementById('postImageInput').value = '';
+  const reader = new FileReader();
+  reader.onload = ev => {
+    currentPostVideo = ev.target.result;
+    const vid = document.getElementById('postVideoPreview');
+    vid.src = ev.target.result;
+    vid.style.display = 'block';
+  };
   reader.readAsDataURL(file);
 }
 
@@ -703,13 +1099,84 @@ function createPost() {
   const text = document.getElementById('postText').value.trim();
   const imgEl = document.getElementById('postImagePreview');
   const image = imgEl.style.display !== 'none' ? imgEl.src : '';
-  if (!text && !image) { showToast('כתוב משהו או הוסף תמונה 😊'); return; }
-  const post = { id: Date.now(), text, image, time: new Date().toISOString(), likes: 0 };
+  const video = currentPostVideo || '';
+  if (!text && !image && !video) { showToast('כתוב משהו או הוסף תמונה/סרטון 😊'); return; }
+  const post = { id: Date.now(), text, image, video, time: new Date().toISOString(), likes: 0 };
   data.posts.unshift(post); saveData(data);
   closeNewPost(); renderFeed(); renderMyPosts(); updateStats();
   showToast('הפוסט פורסם! 🚀');
 }
 
+// ========== VIDEO/SHORT MODAL ==========
+let currentVideoType = 'video';
+let selectedEffect = '';
+let currentVideoFile = '';
+let currentVideoImage = '';
+
+function openVideoModal() {
+  currentVideoType = 'video';
+  document.getElementById('videoModalTitle').innerHTML = '<svg class="svg-icon"><use href="#icon-video"/></svg> סרטון חדש';
+  document.getElementById('videoModal').classList.add('show');
+}
+function openShortModal() {
+  currentVideoType = 'short';
+  document.getElementById('videoModalTitle').innerHTML = '<svg class="svg-icon"><use href="#icon-zap"/></svg> שורט חדש';
+  document.getElementById('videoModal').classList.add('show');
+}
+function closeVideoModal() {
+  document.getElementById('videoModal').classList.remove('show');
+  document.getElementById('videoText').value = '';
+  document.getElementById('videoFilePreview').style.display = 'none';
+  document.getElementById('videoImagePreview').style.display = 'none';
+  document.getElementById('videoFileInput').value = '';
+  currentVideoFile = ''; currentVideoImage = ''; selectedEffect = '';
+  document.querySelectorAll('.effect-card').forEach(c => c.classList.remove('selected'));
+}
+
+function selectEffect(el, name) {
+  document.querySelectorAll('.effect-card').forEach(c => c.classList.remove('selected'));
+  if (selectedEffect === name) { selectedEffect = ''; return; }
+  el.classList.add('selected');
+  selectedEffect = name;
+}
+
+function previewVideoFile(e) {
+  const file = e.target.files[0]; if (!file) return;
+  const isVideo = file.type.startsWith('video/');
+  const reader = new FileReader();
+  reader.onload = ev => {
+    if (isVideo) {
+      currentVideoFile = ev.target.result;
+      currentVideoImage = '';
+      const vid = document.getElementById('videoFilePreview');
+      vid.src = ev.target.result; vid.style.display = 'block';
+      document.getElementById('videoImagePreview').style.display = 'none';
+    } else {
+      currentVideoImage = ev.target.result;
+      currentVideoFile = '';
+      const img = document.getElementById('videoImagePreview');
+      img.src = ev.target.result; img.style.display = 'block';
+      document.getElementById('videoFilePreview').style.display = 'none';
+    }
+  };
+  reader.readAsDataURL(file);
+}
+
+function createVideoPost() {
+  const text = document.getElementById('videoText').value.trim();
+  const video = currentVideoFile || '';
+  const image = currentVideoImage || '';
+  if (!text && !video && !image) { showToast('הוסף תוכן או בחר קובץ 😊'); return; }
+  const typeLabel = currentVideoType === 'short' ? '⚡ שורט' : '🎬 סרטון';
+  const effectLabel = selectedEffect ? ` | אפקט: ${selectedEffect}` : '';
+  const fullText = `[${typeLabel}${effectLabel}]\n${text}`;
+  const post = { id: Date.now(), text: fullText, image, video, time: new Date().toISOString(), likes: 0 };
+  data.posts.unshift(post); saveData(data);
+  closeVideoModal(); renderFeed(); renderMyPosts(); updateStats();
+  showToast(currentVideoType === 'short' ? 'השורט פורסם! ⚡' : 'הסרטון פורסם! 🎬');
+}
+
+// ========== RENDER FEED ==========
 function renderFeed() {
   const c = document.getElementById('posts-container');
   const empty = document.getElementById('empty-feed');
@@ -730,18 +1197,26 @@ function postHTML(p, i) {
     ? `<img src="${data.profile.avatar}" alt="">`
     : data.profile.avatarEmoji || '😎';
   const time = timeAgo(new Date(p.time));
+  let mediaHTML = '';
+  if (p.video) {
+    mediaHTML = `<div class="post-video-wrapper"><video src="${p.video}" controls playsinline preload="metadata"></video></div>`;
+  } else if (p.image) {
+    mediaHTML = `<img class="post-image" src="${p.image}" alt="">`;
+  }
   return `<div class="post-card" style="animation-delay:${i * 0.08}s">
     <div class="post-header">
       <div class="post-avatar">${avatar}</div>
       <div><div class="post-author">${esc(data.profile.name)}</div><div class="post-time">${time}</div></div>
     </div>
     ${p.text ? `<div class="post-content">${esc(p.text)}</div>` : ''}
-    ${p.image ? `<img class="post-image" src="${p.image}" alt="">` : ''}
+    ${mediaHTML}
     <div class="post-actions">
       <button class="post-action-btn ${liked ? 'liked' : ''}" onclick="likePost(${p.id})">
-        ${liked ? '❤️' : '🤍'} ${p.likes}
+        <svg class="svg-icon-sm"><use href="${liked ? '#icon-heart-filled' : '#icon-heart'}"/></svg> ${p.likes}
       </button>
-      <button class="post-action-btn post-delete" onclick="deletePost(${p.id})">🗑️</button>
+      <button class="post-action-btn post-delete" onclick="deletePost(${p.id})">
+        <svg class="svg-icon-sm"><use href="#icon-trash"/></svg>
+      </button>
     </div>
   </div>`;
 }
@@ -758,14 +1233,14 @@ function deletePost(id) {
   data.posts = data.posts.filter(p => p.id !== id);
   delete data.likes[id]; saveData(data);
   renderFeed(); renderMyPosts(); updateStats();
-  showToast('הפוסט נמחק 🗑️');
+  showToast('הפוסט נמחק');
 }
 
 // ========== PROFILE ==========
 function renderProfile() {
   document.getElementById('profileName').textContent = data.profile.name;
   document.getElementById('profileUsername').textContent = data.profile.username;
-  document.getElementById('profileBio').textContent = data.profile.bio || 'לחץ כדי לערוך את הביו שלך ✏️';
+  document.getElementById('profileBio').textContent = data.profile.bio || 'לחץ כדי לערוך את הביו שלך';
   const av = document.getElementById('profileAvatar');
   av.innerHTML = data.profile.avatar ? `<img src="${data.profile.avatar}" alt="">` : (data.profile.avatarEmoji || '😎');
 }
@@ -838,7 +1313,7 @@ function renderRaffles() {
         ${r.active && !r.joined ? `<button class="join-raffle-btn" onclick="joinRaffle(${r.id})">הצטרף להגרלה 🎯</button>` : ''}
         ${r.active && r.joined ? `<button class="join-raffle-btn joined">✅ נרשמת!</button>` : ''}
         ${r.active ? `<button class="btn btn-secondary" onclick="drawWinner(${r.id})">🎲 הגרל זוכה</button>` : ''}
-        <button class="btn btn-secondary" style="color:#ef4444" onclick="deleteRaffle(${r.id})">🗑️</button>
+        <button class="btn btn-secondary" style="color:#ef4444" onclick="deleteRaffle(${r.id})"><svg class="svg-icon-sm" style="fill:#ef4444"><use href="#icon-trash"/></svg></button>
       </div>
     </div>
   `).join('');
@@ -866,7 +1341,7 @@ function deleteRaffle(id) {
   if (!confirm('למחוק את ההגרלה?')) return;
   data.raffles = data.raffles.filter(r => r.id !== id);
   saveData(data); renderRaffles(); updateStats();
-  showToast('ההגרלה נמחקה 🗑️');
+  showToast('ההגרלה נמחקה');
 }
 
 // ========== CONFETTI ==========
@@ -888,10 +1363,9 @@ function launchConfetti() {
     setTimeout(() => el.remove(), 4500);
   }
 }
-// Inject confetti keyframes
-const style = document.createElement('style');
-style.textContent = `@keyframes confettiFall { 0%{transform:translateY(0) rotate(0deg);opacity:1} 100%{transform:translateY(100vh) rotate(${360+Math.random()*360}deg);opacity:0} }`;
-document.head.appendChild(style);
+const confettiStyle = document.createElement('style');
+confettiStyle.textContent = `@keyframes confettiFall { 0%{transform:translateY(0) rotate(0deg);opacity:1} 100%{transform:translateY(100vh) rotate(${360+Math.random()*360}deg);opacity:0} }`;
+document.head.appendChild(confettiStyle);
 
 // ========== UTILS ==========
 function esc(s) { const d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
@@ -922,8 +1396,8 @@ init();
 if (data.posts.length === 0 && !localStorage.getItem('inboby_welcomed')) {
   localStorage.setItem('inboby_welcomed', '1');
   data.posts = [
-    { id: 1, text: 'ברוכים הבאים ל-InBoby! 🎉🚀\nהפלטפורמה שלכם, המקום שלכם.\nתתחילו לפרסם, ליצור הגרלות ולהנות!', image: '', time: new Date().toISOString(), likes: 5 },
-    { id: 2, text: 'InBoby v1.0 יצא לדרך! 💜\nיש לנו פיד, הגרלות, פרופיל ודארק מוד.\nמה עוד תרצו? ספרו לנו! 👇', image: '', time: new Date(Date.now() - 300000).toISOString(), likes: 3 }
+    { id: 1, text: 'ברוכים הבאים ל-InBoby! 🎉🚀\nהפלטפורמה שלכם, המקום שלכם.\nתתחילו לפרסם, ליצור הגרלות ולהנות!', image: '', video: '', time: new Date().toISOString(), likes: 5 },
+    { id: 2, text: 'InBoby v2.0 יצא לדרך! 💜\nיש לנו פיד, הגרלות, סרטונים, שורטים, אפקטים ודארק מוד.\nמה עוד תרצו? ספרו לנו! 👇', image: '', video: '', time: new Date(Date.now() - 300000).toISOString(), likes: 3 }
   ];
   data.raffles = [
     { id: 3, name: '🎮 הגרלת סקין נדיר!', desc: 'השתתפו בהגרלה ותנסו לזכות בסקין הכי נדיר במשחק!', prize: 'סקין לג\'נדרי', participants: 12, active: true, joined: false, winner: '' }
