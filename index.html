@@ -383,8 +383,8 @@ body.no-animations, body.no-animations * {
   width: 100%; object-fit: cover; display: none;
 }
 .modal-video-preview {
-  margin-top: 12px; border-radius: var(--radius-sm); max-height: 200px;
-  width: 100%; display: none;
+  margin-top: 12px; border-radius: var(--radius-sm); max-height: 300px;
+  width: 100%; display: none; background: #000;
 }
 
 .modal-actions { display: flex; gap: 10px; margin-top: 16px; justify-content: flex-end; }
@@ -996,7 +996,7 @@ body.no-animations, body.no-animations * {
     <h2><svg class="svg-icon"><use href="#icon-edit"/></svg> פוסט חדש</h2>
     <textarea id="postText" placeholder="מה עובר לך בראש? 🤔" rows="4"></textarea>
     <img class="modal-image-preview" id="postImagePreview">
-    <video class="modal-video-preview" id="postVideoPreview" controls></video>
+    <video class="modal-video-preview" id="postVideoPreview" controls playsinline></video>
     <div style="display:flex;gap:10px;margin-top:12px;flex-wrap:wrap">
       <label class="btn-image"><svg class="svg-icon-sm"><use href="#icon-camera"/></svg> הוסף תמונה<input type="file" accept="image/*" id="postImageInput" style="display:none" onchange="previewPostImage(event)"></label>
       <label class="btn-image"><svg class="svg-icon-sm"><use href="#icon-video"/></svg> הוסף סרטון<input type="file" accept="video/mp4,video/webm,video/quicktime" id="postVideoInput" style="display:none" onchange="previewPostVideo(event)"></label>
@@ -1088,7 +1088,7 @@ body.no-animations, body.no-animations * {
       <svg class="svg-icon"><use href="#icon-image"/></svg> בחר מהגלריה
       <input type="file" accept="video/mp4,video/webm,video/quicktime,image/*" id="videoFileInput" style="display:none" onchange="previewVideoFile(event)">
     </label>
-    <video class="modal-video-preview" id="videoFilePreview" controls></video>
+    <video class="modal-video-preview" id="videoFilePreview" controls playsinline></video>
     <img class="modal-image-preview" id="videoImagePreview">
 
     <div class="modal-actions">
@@ -1412,7 +1412,9 @@ function previewPostVideo(e) {
   currentPostVideo = url;
   const vid = document.getElementById('postVideoPreview');
   vid.src = url;
+  vid.load();
   vid.style.display = 'block';
+  vid.onloadedmetadata = () => { vid.currentTime = 0.1; };
 }
 
 async function createPost() {
@@ -1476,7 +1478,10 @@ function previewVideoFile(e) {
     currentVideoFile = url;
     currentVideoImage = '';
     const vid = document.getElementById('videoFilePreview');
-    vid.src = url; vid.style.display = 'block';
+    vid.src = url;
+    vid.load();
+    vid.style.display = 'block';
+    vid.onloadedmetadata = () => { vid.currentTime = 0.1; }; // Force thumbnail
     document.getElementById('videoImagePreview').style.display = 'none';
   } else {
     const reader = new FileReader();
@@ -1553,9 +1558,9 @@ function postHTML(p, i) {
   const time = timeAgo(new Date(p.time));
   let mediaHTML = '';
   if (p.hasVideo && p._videoURL) {
-    mediaHTML = `<div class="post-video-wrapper"><video src="${p._videoURL}" controls playsinline preload="metadata"></video></div>`;
+    mediaHTML = `<div class="post-video-wrapper"><video src="${p._videoURL}" controls playsinline preload="auto"></video></div>`;
   } else if (p.video) {
-    mediaHTML = `<div class="post-video-wrapper"><video src="${p.video}" controls playsinline preload="metadata"></video></div>`;
+    mediaHTML = `<div class="post-video-wrapper"><video src="${p.video}" controls playsinline preload="auto"></video></div>`;
   } else if (p.image) {
     mediaHTML = `<img class="post-image" src="${p.image}" alt="">`;
   }
