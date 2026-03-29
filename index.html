@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>InBoby v4.5 - Social Platform by Lyrbox 🚀</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700;900&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    
+    <!-- PWA Meta Tags -->
+    <meta name="theme-color" content="#000000">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="manifest" href="manifest.json">
+    
+    <!-- Preload Critical Resources -->
+    <link rel="preload" href="components/App.js" as="script">
+    <link rel="preload" href="components/SplashScreen.js" as="script">
+</head>
+<body>
+    <!-- Loading Screen -->
+    <div id="loading-screen" class="loading-screen">
+        <div class="loading-container">
+            <div class="logo-container">
+                <div class="logo-icon animated-bounce">📱</div>
+                <h1 class="logo-text animated-fade-in-up">InBoby</h1>
+                <p class="logo-subtitle animated-fade-in-up-delay">v4.5 - Social Platform</p>
+            </div>
+            <div class="loading-bar-container">
+                <div class="loading-bar">
+                    <div class="loading-progress" id="loading-progress"></div>
+                </div>
+                <p class="loading-text" id="loading-text">טוען...</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main App -->
+    <div id="root"></div>
+    
+    <!-- React Components -->
+    <script type="text/babel" src="components/SplashScreen.js"></script>
+    <script type="text/babel" src="components/App.js"></script>
+    <script type="text/babel" src="components/VideoFeed.js"></script>
+    <script type="text/babel" src="components/Messages.js"></script>
+    <script type="text/babel" src="components/Channels.js"></script>
+    <script type="text/babel" src="components/Profile.js"></script>
+    <script type="text/babel" src="components/Settings.js"></script>
+    <script type="text/babel" src="script.js"></script>
+</body>
+</html>
